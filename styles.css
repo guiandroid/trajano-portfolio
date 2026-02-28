@@ -1,0 +1,1103 @@
+/* ================================================================
+   TRAJANO — Fotografia de Moda
+   styles.css
+   ----------------------------------------------------------------
+   Estrutura:
+   1.  Variáveis & Reset
+   2.  Utilitários globais
+   3.  Grain & Custom Cursor
+   4.  Navegação
+   5.  Hero
+   6.  Serviços
+   7.  Portfólio
+   8.  Sobre
+   9.  Agendamento
+   10. Rodapé
+   11. Animações
+   12. Media queries — Tablet (≤ 1024px)
+   13. Media queries — Mobile (≤ 768px)
+   14. Media queries — Mobile pequeno (≤ 420px)
+   15. Acessibilidade — foco visível & preferências
+   ================================================================ */
+
+
+/* ────────────────────────────────────────────────────────────────
+   1. VARIÁVEIS & RESET
+──────────────────────────────────────────────────────────────── */
+:root {
+  /* Cores */
+  --color-black:      #080808;
+  --color-white:      #f2f0ed;
+  --color-grey:       #8a8a8a;
+  --color-grey-light: #c8c4be;
+  --color-accent:     #c9b49a;
+  --color-surface:    #0f0f0f;
+  --color-surface-2:  #050505;
+
+  /* Tipografia */
+  --font-sans:   'Montserrat', sans-serif;
+  --font-serif:  'Cormorant Garamond', serif;
+
+  /* Espaçamentos — escala de 4 pt */
+  --space-xs:  0.5rem;   /*  8px */
+  --space-sm:  1rem;     /* 16px */
+  --space-md:  1.5rem;   /* 24px */
+  --space-lg:  2.5rem;   /* 40px */
+  --space-xl:  4rem;     /* 64px */
+  --space-2xl: 7rem;     /* 112px */
+
+  /* Seções horizontais */
+  --section-px: 2.5rem;
+
+  /* Transições */
+  --transition-fast:   0.2s ease;
+  --transition-base:   0.35s ease;
+  --transition-slow:   0.5s ease;
+
+  /* Z-index */
+  --z-grain:   1000;
+  --z-cursor:  9998;
+  --z-nav:     100;
+}
+
+/* Reset mínimo */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Evita CLS durante carregamento das fontes */
+  font-display: swap;
+}
+
+body {
+  background-color: var(--color-black);
+  color: var(--color-white);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.6;
+  overflow-x: hidden;
+  /* Cursor customizado ativo somente em desktop via JS */
+  cursor: auto;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Scrollbar fina */
+::-webkit-scrollbar              { width: 2px; }
+::-webkit-scrollbar-track        { background: var(--color-black); }
+::-webkit-scrollbar-thumb        { background: var(--color-grey); }
+
+
+/* ────────────────────────────────────────────────────────────────
+   2. UTILITÁRIOS GLOBAIS
+──────────────────────────────────────────────────────────────── */
+
+/* Labels de seção */
+.section-label {
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: var(--space-xs);
+}
+
+/* Títulos de seção */
+.section-title {
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(1.9rem, 3.5vw, 3.2rem);
+  color: var(--color-white);
+  line-height: 1.2;
+  margin-bottom: var(--space-xl);
+}
+
+/* Divisória accent */
+.hr-accent {
+  width: 36px;
+  height: 1px;
+  background: var(--color-accent);
+  margin: var(--space-md) 0;
+}
+
+/* Reveal animation — aplicado via JS quando entra na viewport */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+  /* Usa will-change apenas quando necessário para não taxar GPU desnecessariamente */
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.reveal-delay-1 { transition-delay: 0.10s; }
+.reveal-delay-2 { transition-delay: 0.20s; }
+.reveal-delay-3 { transition-delay: 0.30s; }
+
+/* Botão primário */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 2rem;
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  /* Animação de fill — propriedades performáticas (transform, opacity) */
+  position: relative;
+  overflow: hidden;
+  transition: color var(--transition-base);
+  /* Tamanho mínimo acessível em mobile */
+  min-height: 44px;
+}
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--transition-base);
+  z-index: -1;
+}
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  color: var(--color-black);
+}
+.btn-primary:hover::before,
+.btn-primary:focus-visible::before {
+  transform: scaleX(1);
+}
+
+/* Botão secundário */
+.btn-secondary {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-grey);
+  text-decoration: none;
+  transition: color var(--transition-base);
+  /* Área mínima de toque */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.btn-secondary:hover,
+.btn-secondary:focus-visible {
+  color: var(--color-white);
+}
+
+
+/* ────────────────────────────────────────────────────────────────
+   3. GRAIN OVERLAY & CUSTOM CURSOR
+──────────────────────────────────────────────────────────────── */
+
+/*
+  Grain: usa SVG data-URI com will-change:transform para que o
+  browser o coloque em sua própria camada — reduz repaint.
+*/
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-grain);
+  pointer-events: none;
+  opacity: 0.03;
+  /* SVG inline — baixo custo, sem request de rede */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  will-change: transform; /* camada dedicada */
+}
+
+/* Cursor customizado — visível apenas em desktop (≥ 1024px, não-touch) via JS */
+.cursor {
+  width: 8px;
+  height: 8px;
+  background: var(--color-white);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: calc(var(--z-cursor) + 1);
+  /* transform posiciona, evitando top/left reflows */
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+  /* Inicia invisível; JS ativa quando mouse se move */
+  opacity: 0;
+}
+.cursor.active { opacity: 1; }
+
+.cursor-ring {
+  width: 32px;
+  height: 32px;
+  border: 1px solid rgba(242, 240, 237, 0.4);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: var(--z-cursor);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s ease, height 0.3s ease, opacity 0.3s ease;
+  opacity: 0;
+}
+.cursor-ring.active { opacity: 1; }
+
+/* Estado "hover" do cursor */
+.cursor.cursor--hover   { width: 4px;  height: 4px;  }
+.cursor-ring.cursor--hover { width: 48px; height: 48px; }
+
+/* Quando cursor customizado está ativo, esconde o padrão do browser */
+body.custom-cursor { cursor: none; }
+
+
+/* ────────────────────────────────────────────────────────────────
+   4. NAVEGAÇÃO
+──────────────────────────────────────────────────────────────── */
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: var(--z-nav);
+  padding: 1.6rem var(--section-px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  /* Glassmorphism leve */
+  background: rgba(8, 8, 8, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.nav-logo {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 0.75rem;
+  letter-spacing: 0.45em;
+  color: var(--color-white);
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.nav-links {
+  display: flex;
+  gap: 2.5rem;
+  list-style: none;
+}
+.nav-links a {
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-grey-light);
+  text-decoration: none;
+  transition: color var(--transition-base);
+  /* Área de clique acessível */
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+.nav-links a:hover,
+.nav-links a:focus-visible {
+  color: var(--color-white);
+}
+
+/* Botão hamburguer — visível somente em mobile (via media query) */
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--color-white);
+}
+.nav-toggle-bar {
+  display: block;
+  width: 22px;
+  height: 1px;
+  background: var(--color-white);
+  transition: transform var(--transition-base), opacity var(--transition-base);
+  transform-origin: center;
+}
+/* Estado aberto do menu */
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:first-child {
+  transform: translateY(3.5px) rotate(45deg);
+}
+.nav-toggle[aria-expanded="true"] .nav-toggle-bar:last-child {
+  transform: translateY(-3.5px) rotate(-45deg);
+}
+
+
+/* ────────────────────────────────────────────────────────────────
+   5. HERO
+──────────────────────────────────────────────────────────────── */
+.hero {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 8rem var(--section-px) 5rem;
+  position: relative;
+  z-index: 2;
+}
+
+.hero-right {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Placeholder visual — remover quando foto real for adicionada */
+.hero-image-placeholder {
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  background: linear-gradient(160deg, #1a1a1a 0%, #111 50%, #0d0d0d 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hero-image-placeholder span {
+  font-size: 0.55rem;
+  letter-spacing: 0.4em;
+  color: rgba(255, 255, 255, 0.1);
+  text-transform: uppercase;
+}
+
+/* Subtítulo acima do H1 */
+.hero-sub {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+  margin-bottom: var(--space-sm);
+  /* Animação de entrada escalonada */
+  opacity: 0;
+  animation: fadeUp 1s ease 0.3s forwards;
+}
+
+/* H1 — único na página */
+.logo-hero {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  font-size: clamp(2.8rem, 6vw, 5.5rem);
+  letter-spacing: 0.3em;
+  color: var(--color-white);
+  line-height: 1;
+  margin-bottom: 1.8rem;
+  opacity: 0;
+  animation: fadeUp 1s ease 0.5s forwards;
+}
+
+.hero-desc {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1.15rem;
+  font-weight: 400;
+  color: var(--color-grey);
+  line-height: 1.9;
+  max-width: 360px;
+  margin-bottom: var(--space-lg);
+  opacity: 0;
+  animation: fadeUp 1s ease 0.7s forwards;
+}
+
+.hero-cta {
+  display: flex;
+  gap: var(--space-md);
+  align-items: center;
+  flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeUp 1s ease 0.9s forwards;
+}
+
+
+/* ────────────────────────────────────────────────────────────────
+   6. SERVIÇOS
+──────────────────────────────────────────────────────────────── */
+.services {
+  padding: var(--space-2xl) var(--section-px);
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.service-card {
+  background: var(--color-black);
+  padding: 2.5rem 2rem;
+  position: relative;
+  overflow: hidden;
+  transition: background var(--transition-base);
+}
+.service-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--transition-slow);
+}
+.service-card:hover            { background: var(--color-surface); }
+.service-card:hover::before    { transform: scaleX(1); }
+
+.service-num {
+  font-family: var(--font-serif);
+  font-size: 3rem;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.05);
+  position: absolute;
+  top: 1rem; right: 1.5rem;
+  line-height: 1;
+  /* Decorativo — leitores de tela ignoram via aria-hidden no HTML */
+}
+
+.service-name {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-white);
+  margin-bottom: var(--space-sm);
+}
+
+.service-desc {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--color-grey);
+  line-height: 1.8;
+}
+
+
+/* ────────────────────────────────────────────────────────────────
+   7. PORTFÓLIO
+──────────────────────────────────────────────────────────────── */
+.portfolio {
+  padding: var(--space-xl) var(--section-px);
+}
+
+.portfolio-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: var(--space-lg);
+  gap: var(--space-sm);
+}
+
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+
+/* Item destaque ocupa as 2 colunas */
+.portfolio-item--featured {
+  grid-column: span 2;
+}
+
+.portfolio-item {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Placeholder visual da imagem */
+.portfolio-placeholder {
+  width: 100%;
+  padding-top: 75%;
+  background: #111;
+  position: relative;
+  /* transform para zoom — evita reflow */
+  transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.portfolio-item--featured .portfolio-placeholder { padding-top: 45%; }
+.portfolio-placeholder span {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.5rem;
+  letter-spacing: 0.4em;
+  color: rgba(255, 255, 255, 0.08);
+  text-transform: uppercase;
+}
+
+.portfolio-item:hover .portfolio-placeholder {
+  transform: scale(1.04);
+}
+
+/* Overlay aparece no hover */
+.portfolio-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: rgba(8, 8, 8, 0.55);
+  opacity: 0;
+  transition: opacity var(--transition-base);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.5rem;
+}
+.portfolio-item:hover .portfolio-overlay  { opacity: 1; }
+/* Acessível via foco de teclado também */
+.portfolio-item:focus-within .portfolio-overlay { opacity: 1; }
+
+.portfolio-overlay-title {
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-white);
+  margin-bottom: 0.3rem;
+}
+.portfolio-overlay-sub {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--color-accent);
+}
+
+
+/* ────────────────────────────────────────────────────────────────
+   8. SOBRE
+──────────────────────────────────────────────────────────────── */
+.about {
+  padding: var(--space-2xl) var(--section-px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6rem;
+  align-items: center;
+}
+
+.about-image-wrap {
+  position: relative;
+}
+.about-placeholder {
+  width: 100%;
+  padding-top: 125%;
+  background: #111;
+  position: relative;
+}
+.about-placeholder span {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.5rem;
+  letter-spacing: 0.4em;
+  color: rgba(255, 255, 255, 0.08);
+  text-transform: uppercase;
+}
+/* Moldura decorativa */
+.about-accent-line {
+  position: absolute;
+  right: -1.2rem;
+  bottom: -1.2rem;
+  width: 55%;
+  height: 55%;
+  border-right: 1px solid rgba(201, 180, 154, 0.2);
+  border-bottom: 1px solid rgba(201, 180, 154, 0.2);
+}
+
+.about-content .section-title { margin-bottom: var(--space-md); }
+
+.about-text {
+  font-family: var(--font-serif);
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--color-grey);
+  line-height: 2;
+  margin-bottom: var(--space-sm);
+}
+
+/* Stats como definition list — semântico */
+.about-stats {
+  display: flex;
+  gap: var(--space-lg);
+  margin: var(--space-lg) 0;
+}
+.about-stat {
+  display: flex;
+  flex-direction: column-reverse; /* dd antes de dt visualmente */
+}
+.stat-num {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 400;
+  color: var(--color-white);
+}
+.stat-label {
+  font-family: var(--font-sans);
+  font-size: 0.55rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-grey);
+}
+
+.about-links {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+}
+
+
+/* ────────────────────────────────────────────────────────────────
+   9. AGENDAMENTO
+──────────────────────────────────────────────────────────────── */
+.booking {
+  padding: var(--space-2xl) var(--section-px);
+  background: var(--color-surface-2);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.booking-inner {
+  max-width: 680px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.booking-title {
+  font-family: var(--font-serif);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 400;
+  font-style: italic;
+  color: var(--color-white);
+  line-height: 1.2;
+  margin-bottom: var(--space-sm);
+}
+
+.booking-sub {
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-grey);
+  margin-bottom: var(--space-xl);
+}
+
+.booking-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin-bottom: var(--space-lg);
+}
+
+.booking-option {
+  background: var(--color-surface-2);
+  padding: 2rem 1rem;
+  text-align: center;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  width: 100%;
+  transition: background var(--transition-base);
+  /* Área mínima acessível */
+  min-height: 44px;
+}
+.booking-option:hover,
+.booking-option:focus-visible {
+  background: var(--color-surface);
+}
+
+.booking-option-icon {
+  font-family: var(--font-serif);
+  font-size: 1.6rem;
+  font-style: italic;
+  color: var(--color-accent);
+  display: block;
+  margin-bottom: var(--space-xs);
+}
+.booking-option-name {
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--color-white);
+  display: block;
+  margin-bottom: 0.3rem;
+}
+.booking-option-desc {
+  font-family: var(--font-serif);
+  font-size: 0.85rem;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--color-grey);
+}
+
+/* Botão WhatsApp principal */
+.whatsapp-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  padding: 1.1rem 2.5rem;
+  border: 1px solid var(--color-white);
+  color: var(--color-white);
+  text-decoration: none;
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+  transition: color var(--transition-base);
+  min-height: 44px;
+}
+.whatsapp-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--color-white);
+  transform: scaleY(0);
+  transform-origin: bottom center;
+  transition: transform var(--transition-base);
+  z-index: -1;
+}
+.whatsapp-btn:hover,
+.whatsapp-btn:focus-visible {
+  color: var(--color-black);
+}
+.whatsapp-btn:hover::before,
+.whatsapp-btn:focus-visible::before {
+  transform: scaleY(1);
+}
+.whatsapp-icon {
+  flex-shrink: 0;
+}
+
+.booking-note {
+  margin-top: var(--space-sm);
+  font-family: var(--font-sans);
+  font-size: 0.55rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  color: rgba(138, 138, 138, 0.5);
+}
+
+
+/* ────────────────────────────────────────────────────────────────
+   10. RODAPÉ
+──────────────────────────────────────────────────────────────── */
+.footer {
+  padding: var(--space-lg) var(--section-px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.footer-logo {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 0.7rem;
+  letter-spacing: 0.5em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.footer-links {
+  display: flex;
+  gap: var(--space-md);
+  list-style: none;
+}
+.footer-links a {
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  font-weight: 400;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.25);
+  text-decoration: none;
+  transition: color var(--transition-base);
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.footer-links a:hover,
+.footer-links a:focus-visible {
+  color: var(--color-white);
+}
+
+.footer-copy {
+  font-family: var(--font-sans);
+  font-size: 0.5rem;
+  font-weight: 400;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.15);
+}
+
+
+/* ────────────────────────────────────────────────────────────────
+   11. ANIMAÇÕES
+   Todas usam opacity e transform — não acionam layout/paint.
+──────────────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* ────────────────────────────────────────────────────────────────
+   12. MEDIA QUERIES — TABLET (≤ 1024px)
+──────────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+
+  :root {
+    --section-px: 2rem;
+    --space-2xl:  5rem;
+  }
+
+  /* Nav: reduz gap */
+  .nav-links { gap: 2rem; }
+
+  /* Hero: reduz padding lateral */
+  .hero-left { padding: 7rem var(--section-px) 4rem; }
+
+  /* Serviços: ainda 3 colunas, padding menor */
+  .services { padding: 5rem var(--section-px); }
+
+  /* Portfólio */
+  .portfolio { padding: 5rem var(--section-px); }
+
+  /* Sobre: gap menor */
+  .about { gap: 4rem; padding: 5rem var(--section-px); }
+
+  /* Booking */
+  .booking { padding: 5rem var(--section-px); }
+
+}
+
+
+/* ────────────────────────────────────────────────────────────────
+   13. MEDIA QUERIES — MOBILE (≤ 768px)
+──────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  :root {
+    --section-px: 1.5rem;
+    --space-2xl:  4rem;
+    --space-xl:   3rem;
+  }
+
+  /* ── Nav mobile ── */
+  .nav { padding: 1.2rem var(--section-px); }
+
+  /* Mostra botão hamburguer */
+  .nav-toggle { display: flex; }
+
+  /* Menu oculto por padrão — abre via JS */
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0; right: 0;
+    background: rgba(8, 8, 8, 0.97);
+    backdrop-filter: blur(16px);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: var(--space-sm) var(--section-px) var(--space-md);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .nav-links.is-open { display: flex; }
+  .nav-links li { width: 100%; }
+  .nav-links a {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: 52px;
+    font-size: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  /* ── Hero: coluna única, imagem em cima ── */
+  .hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+  }
+  .hero-right { order: -1; }
+  .hero-image-placeholder {
+    min-height: 58vw;
+    max-height: 320px;
+    height: 58vw;
+  }
+  .hero-left {
+    padding: var(--space-lg) var(--section-px) var(--space-xl);
+    justify-content: flex-start;
+  }
+  .logo-hero { font-size: clamp(2.4rem, 13vw, 3.8rem); }
+  .hero-desc { font-size: 1rem; max-width: 100%; }
+  .hero-cta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+  }
+  .btn-primary { width: 100%; }
+
+  /* ── Serviços: 1 coluna ── */
+  .services { padding: var(--space-xl) var(--section-px); }
+  .services-grid { grid-template-columns: 1fr; }
+  .section-title { margin-bottom: var(--space-lg); }
+
+  /* ── Portfólio: 1 coluna ── */
+  .portfolio { padding: var(--space-xl) var(--section-px); }
+  .portfolio-grid { grid-template-columns: 1fr; gap: 4px; }
+  .portfolio-item--featured { grid-column: span 1; }
+  .portfolio-item--featured .portfolio-placeholder { padding-top: 75%; }
+  .portfolio-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    margin-bottom: var(--space-md);
+  }
+  .portfolio-header .section-title { margin-bottom: 0; }
+
+  /* ── Sobre: 1 coluna ── */
+  .about {
+    grid-template-columns: 1fr;
+    padding: var(--space-xl) var(--section-px);
+    gap: var(--space-lg);
+  }
+  .about-accent-line { display: none; }
+  .about-placeholder { padding-top: 100%; }
+  .about-stats { gap: var(--space-md); }
+
+  /* ── Agendamento ── */
+  .booking { padding: var(--space-xl) var(--section-px); }
+  /* Alinha à esquerda no mobile — mais natural em leitura vertical */
+  .booking-inner { text-align: left; }
+  .booking-inner .section-label  { text-align: left; }
+  .booking-title { font-size: clamp(1.8rem, 8vw, 2.5rem); text-align: left; }
+  .booking-sub   { text-align: left; }
+  .booking-options { grid-template-columns: 1fr; }
+  .whatsapp-btn { width: 100%; justify-content: center; }
+
+  /* ── Rodapé ── */
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: var(--space-md) var(--section-px);
+    gap: var(--space-sm);
+  }
+  .footer-links { flex-wrap: wrap; gap: var(--space-sm); }
+
+}
+
+
+/* ────────────────────────────────────────────────────────────────
+   14. MEDIA QUERIES — MOBILE PEQUENO (≤ 420px)
+──────────────────────────────────────────────────────────────── */
+@media (max-width: 420px) {
+
+  :root { --section-px: 1.25rem; }
+
+  /* Logo maior, letter-spacing menor para caber */
+  .logo-hero { letter-spacing: 0.18em; }
+
+  /* Oculta stats menores para não comprimir demais */
+  .about-stat:last-child { display: none; }
+
+  /* Footer: esconde copyright para economizar espaço */
+  .footer-copy { display: none; }
+
+}
+
+
+/* ────────────────────────────────────────────────────────────────
+   15. ACESSIBILIDADE — FOCO VISÍVEL & PREFERÊNCIAS
+──────────────────────────────────────────────────────────────── */
+
+/* Foco visível para navegação por teclado */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Remove outline padrão apenas para cliques (mantém para teclado) */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Respeita preferência por movimento reduzido */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+  .hero-sub,
+  .logo-hero,
+  .hero-desc,
+  .hero-cta {
+    opacity: 1;
+    animation: none;
+  }
+}
+
+/* Alto contraste */
+@media (prefers-contrast: high) {
+  :root {
+    --color-grey: #b0b0b0;
+    --color-grey-light: #d0d0d0;
+  }
+}
