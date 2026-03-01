@@ -426,9 +426,9 @@ body.custom-cursor { cursor: none; }
 
 .hero-desc {
   font-family: var(--font-serif);
-  font-style: italic;
+  font-style: normal;
   font-size: 1.15rem;
-  font-weight: 600;
+  font-weight: 500;
   color: var(--color-grey);
   line-height: 1.9;
   max-width: 360px;
