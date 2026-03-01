@@ -428,7 +428,7 @@ body.custom-cursor { cursor: none; }
   font-family: var(--font-serif);
   font-style: italic;
   font-size: 1.15rem;
-  font-weight: 400;
+  font-weight: 600;
   color: var(--color-grey);
   line-height: 1.9;
   max-width: 360px;
