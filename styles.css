@@ -362,8 +362,8 @@ body.custom-cursor { cursor: none; }
   height: 100%;
   min-height: 100vh;
   object-fit: cover;
+  object-position: center;
   display: block;
-}
 }
 
 .hero-left {
