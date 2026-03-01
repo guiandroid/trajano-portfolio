@@ -23,7 +23,7 @@
 ================================================================ */
 const CONFIG = {
   // ⚠️  Substitua pelo número real no formato internacional (sem +)
-  whatsappPhone: '5511999999999',
+  whatsappPhone: '5519971531233',
 
   // Breakpoint abaixo do qual o cursor customizado é desativado
   cursorBreakpoint: 1024,
