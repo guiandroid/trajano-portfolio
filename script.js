@@ -108,6 +108,8 @@ const CustomCursor = (() => {
     if (!isDesktopPointer()) return; // Não inicializa em touch/tablet pequeno
 
     enable();
+     cursorEl.style.pointerEvents = 'none';
+ringEl.style.pointerEvents = 'none';
     document.addEventListener('mousemove', onMouseMove, { passive: true });
     requestAnimationFrame(animateRing);
     attachHoverListeners();
