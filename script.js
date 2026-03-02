@@ -49,31 +49,25 @@ const CustomCursor = (() => {
 
   if (!cursorEl || !ringEl) return { init: () => {} };
 
-  // Coordenadas do mouse
   let mouseX = 0, mouseY = 0;
-  // Coordenadas do anel (seguem com lag suave)
   let ringX  = 0, ringY  = 0;
 
-  /** Verifica se o dispositivo suporta hover fino (não é touch) */
   const isDesktopPointer = () =>
     window.matchMedia('(hover: hover) and (pointer: fine)').matches &&
     window.innerWidth >= CONFIG.cursorBreakpoint;
 
-  /** Ativa o cursor customizado */
   const enable = () => {
     document.body.classList.add('custom-cursor');
     cursorEl.classList.add('active');
     ringEl.classList.add('active');
   };
 
-  /** Desativa o cursor customizado — restaura cursor padrão */
   const disable = () => {
     document.body.classList.remove('custom-cursor');
     cursorEl.classList.remove('active');
     ringEl.classList.remove('active');
   };
 
-  /** Atualiza posição do cursor principal (imediato) */
   const onMouseMove = ({ clientX, clientY }) => {
     mouseX = clientX;
     mouseY = clientY;
@@ -81,7 +75,6 @@ const CustomCursor = (() => {
     cursorEl.style.top  = `${mouseY}px`;
   };
 
-  /** Anima o anel com easing suave — loop via rAF */
   const animateRing = () => {
     ringX += (mouseX - ringX) * 0.12;
     ringY += (mouseY - ringY) * 0.12;
@@ -90,7 +83,6 @@ const CustomCursor = (() => {
     requestAnimationFrame(animateRing);
   };
 
-  /** Reduz cursor ao hover em elementos interativos */
   const attachHoverListeners = () => {
     document.querySelectorAll('a, button').forEach((el) => {
       el.addEventListener('mouseenter', () => {
@@ -105,7 +97,7 @@ const CustomCursor = (() => {
   };
 
   const init = () => {
-    if (!isDesktopPointer()) return; // Não inicializa em touch/tablet pequeno
+    if (!isDesktopPointer()) return;
 
     enable();
     cursorEl.style.pointerEvents = 'none';
@@ -114,7 +106,6 @@ const CustomCursor = (() => {
     requestAnimationFrame(animateRing);
     attachHoverListeners();
 
-    // Reavalia se a janela for redimensionada (ex: rotação de tablet)
     window.addEventListener('resize', () => {
       isDesktopPointer() ? enable() : disable();
     }, { passive: true });
@@ -127,8 +118,6 @@ const CustomCursor = (() => {
 /* ================================================================
    3. SCROLL REVEAL
    ─ Usa IntersectionObserver (performático, não usa scroll events).
-   ─ Elementos com .reveal ficam invisíveis até entrar na viewport.
-   ─ Suporte a reduced-motion tratado no CSS.
 ================================================================ */
 const ScrollReveal = (() => {
   const observerOptions = {
@@ -140,15 +129,12 @@ const ScrollReveal = (() => {
     entries.forEach(({ isIntersecting, target }) => {
       if (!isIntersecting) return;
       target.classList.add('visible');
-      // Para de observar após animar — economiza memória
       observer.unobserve(target);
     });
   };
 
   const init = () => {
-    // Verifica suporte (todos os browsers modernos suportam)
     if (!('IntersectionObserver' in window)) {
-      // Fallback: mostra tudo imediatamente
       document.querySelectorAll('.reveal').forEach((el) =>
         el.classList.add('visible')
       );
@@ -166,9 +152,24 @@ const ScrollReveal = (() => {
 /* ================================================================
    4. SMOOTH SCROLL
    ─ Scroll suave para links de âncora (#secao).
-   ─ Compensa o offset fixo da navegação.
+   ─ CORREÇÃO MOBILE: usa window.scrollTo() com cálculo manual
+     de offset em vez de scrollIntoView({ behavior: 'smooth' }),
+     que é ignorado em alguns browsers mobile (Safari iOS, WebView).
+   ─ Desconta a altura do header fixo para não esconder o título.
 ================================================================ */
 const SmoothScroll = (() => {
+  const scrollToTarget = (target) => {
+    const navHeight = document.querySelector('.nav')?.offsetHeight ?? 0;
+    const targetTop = target.getBoundingClientRect().top + window.pageYOffset - navHeight;
+
+    try {
+      window.scrollTo({ top: targetTop, behavior: 'smooth' });
+    } catch (_) {
+      // Fallback para browsers muito antigos
+      window.scrollTo(0, targetTop);
+    }
+  };
+
   const init = () => {
     document.querySelectorAll('a[href^="#"]').forEach((link) => {
       link.addEventListener('click', (e) => {
@@ -179,17 +180,14 @@ const SmoothScroll = (() => {
         if (!target) return;
 
         e.preventDefault();
-
-        target.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
-        });
+        scrollToTarget(target);
       });
     });
   };
 
   return { init };
 })();
+
 
 /* ================================================================
    5. NAVIGATION
@@ -220,21 +218,17 @@ const Navigation = (() => {
   };
 
   const init = () => {
-    // Toggle ao clicar no botão hamburguer
     toggleBtn.addEventListener('click', toggle);
 
-    // Fecha ao clicar em qualquer link do menu
     navMenu.querySelectorAll('a').forEach((link) => {
       link.addEventListener('click', close);
     });
 
-    // Fecha ao clicar fora da nav
     document.addEventListener('click', ({ target }) => {
       const nav = document.querySelector('.nav');
       if (nav && !nav.contains(target)) close();
     });
 
-    // Fecha ao pressionar Escape
     document.addEventListener('keydown', ({ key }) => {
       if (key === 'Escape') close();
     });
@@ -249,17 +243,14 @@ const Navigation = (() => {
    ─ Centraliza toda a lógica de redirecionamento.
    ─ Número configurado em CONFIG (único ponto de edição).
    ─ Botões de tipo usam data-whatsapp-type no HTML.
-   ─ CORREÇÃO MOBILE: botão principal usa href nativo em vez de
-     window.open(), evitando bloqueio de popup em iOS/Android.
+   ─ Botão principal #waLink usa href nativo (evita bloqueio mobile).
 ================================================================ */
 const WhatsApp = (() => {
-  /** Monta a URL do WhatsApp com mensagem pré-preenchida */
   const buildUrl = (type = CONFIG.whatsappDefaultType) => {
     const message = encodeURIComponent(CONFIG.whatsappMessage(type));
     return `https://wa.me/${CONFIG.whatsappPhone}?text=${message}`;
   };
 
-  /** Abre o WhatsApp em nova aba (usado apenas nos botões de tipo) */
   const openViaJS = (type) => {
     window.open(buildUrl(type), '_blank', 'noopener,noreferrer');
   };
@@ -273,9 +264,7 @@ const WhatsApp = (() => {
       });
     });
 
-    // Botão principal "Agendar via WhatsApp"
-    // ✅ CORREÇÃO: usa href nativo para garantir funcionamento em mobile.
-    // window.open() via listener pode ser bloqueado como popup em iOS/Android.
+    // Botão principal "Agendar via WhatsApp" — href nativo para mobile
     const mainBtn = document.getElementById('waLink');
     if (mainBtn) {
       mainBtn.setAttribute('href', buildUrl(CONFIG.whatsappDefaultType));
@@ -290,10 +279,8 @@ const WhatsApp = (() => {
 
 /* ================================================================
    7. UTILS
-   ─ Funções auxiliares sem estado próprio.
 ================================================================ */
 const Utils = {
-  /** Atualiza o ano no rodapé automaticamente */
   setCurrentYear() {
     const el = document.getElementById('currentYear');
     if (el) el.textContent = new Date().getFullYear();
@@ -303,8 +290,6 @@ const Utils = {
 
 /* ================================================================
    8. INIT
-   ─ Ponto de entrada único — inicializa todos os módulos.
-   ─ Executado após o DOM estar completamente parseado.
 ================================================================ */
 const App = {
   init() {
@@ -317,7 +302,6 @@ const App = {
   },
 };
 
-// Garante que o DOM esteja pronto antes de inicializar
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => App.init());
 } else {
