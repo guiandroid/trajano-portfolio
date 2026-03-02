@@ -167,7 +167,7 @@ const ScrollReveal = (() => {
    ─ Compensa o offset fixo da navegação.
 ================================================================ */
 const SmoothScroll = (() => {
-  /** Retorna a altura atual da nav */
+
   const getNavHeight = () => {
     const nav = document.querySelector('.nav');
     return nav ? nav.offsetHeight : 0;
@@ -178,23 +178,33 @@ const SmoothScroll = (() => {
     if (!href || !href.startsWith('#') || href === '#') return;
 
     const target = document.querySelector(href);
+
+    // 👉 Se não encontrar, deixa o navegador agir normalmente
     if (!target) return;
 
     e.preventDefault();
 
-    const offset = target.getBoundingClientRect().top + window.scrollY - getNavHeight();
-    window.scrollTo({ top: offset, behavior: 'smooth' });
+    const offset =
+      target.getBoundingClientRect().top +
+      window.scrollY -
+      getNavHeight();
+
+    window.scrollTo({
+      top: offset,
+      behavior: 'smooth'
+    });
   };
 
   const init = () => {
-    document.querySelectorAll('a[href^="#"]').forEach((link) => {
-      link.addEventListener('click', handleAnchorClick);
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('a[href^="#"]');
+      if (!link) return;
+      handleAnchorClick({ currentTarget: link, preventDefault: () => e.preventDefault() });
     });
   };
 
   return { init };
 })();
-
 
 /* ================================================================
    5. NAVIGATION
