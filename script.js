@@ -320,3 +320,13 @@ if (document.readyState === 'loading') {
 } else {
   App.init();
 }
+const App = {
+  init() {
+    // CustomCursor.init();  ← DESATIVADO
+    ScrollReveal.init();
+    SmoothScroll.init();
+    Navigation.init();
+    WhatsApp.init();
+    Utils.setCurrentYear();
+  },
+};
