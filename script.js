@@ -108,8 +108,8 @@ const CustomCursor = (() => {
     if (!isDesktopPointer()) return; // Não inicializa em touch/tablet pequeno
 
     enable();
-     cursorEl.style.pointerEvents = 'none';
-ringEl.style.pointerEvents = 'none';
+    cursorEl.style.pointerEvents = 'none';
+    ringEl.style.pointerEvents = 'none';
     document.addEventListener('mousemove', onMouseMove, { passive: true });
     requestAnimationFrame(animateRing);
     attachHoverListeners();
@@ -249,6 +249,8 @@ const Navigation = (() => {
    ─ Centraliza toda a lógica de redirecionamento.
    ─ Número configurado em CONFIG (único ponto de edição).
    ─ Botões de tipo usam data-whatsapp-type no HTML.
+   ─ CORREÇÃO MOBILE: botão principal usa href nativo em vez de
+     window.open(), evitando bloqueio de popup em iOS/Android.
 ================================================================ */
 const WhatsApp = (() => {
   /** Monta a URL do WhatsApp com mensagem pré-preenchida */
@@ -257,8 +259,8 @@ const WhatsApp = (() => {
     return `https://wa.me/${CONFIG.whatsappPhone}?text=${message}`;
   };
 
-  /** Abre o WhatsApp em nova aba */
-  const open = (type) => {
+  /** Abre o WhatsApp em nova aba (usado apenas nos botões de tipo) */
+  const openViaJS = (type) => {
     window.open(buildUrl(type), '_blank', 'noopener,noreferrer');
   };
 
@@ -267,17 +269,18 @@ const WhatsApp = (() => {
     document.querySelectorAll('[data-whatsapp-type]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const type = btn.dataset.whatsappType || CONFIG.whatsappDefaultType;
-        open(type);
+        openViaJS(type);
       });
     });
 
     // Botão principal "Agendar via WhatsApp"
+    // ✅ CORREÇÃO: usa href nativo para garantir funcionamento em mobile.
+    // window.open() via listener pode ser bloqueado como popup em iOS/Android.
     const mainBtn = document.getElementById('waLink');
     if (mainBtn) {
-      mainBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        open(CONFIG.whatsappDefaultType);
-      });
+      mainBtn.setAttribute('href', buildUrl(CONFIG.whatsappDefaultType));
+      mainBtn.setAttribute('target', '_blank');
+      mainBtn.setAttribute('rel', 'noopener noreferrer');
     }
   };
 
