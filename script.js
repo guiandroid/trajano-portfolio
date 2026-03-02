@@ -167,39 +167,22 @@ const ScrollReveal = (() => {
    ─ Compensa o offset fixo da navegação.
 ================================================================ */
 const SmoothScroll = (() => {
-
-  const getNavHeight = () => {
-    const nav = document.querySelector('.nav');
-    return nav ? nav.offsetHeight : 0;
-  };
-
-  const handleAnchorClick = (e) => {
-    const href = e.currentTarget.getAttribute('href');
-    if (!href || !href.startsWith('#') || href === '#') return;
-
-    const target = document.querySelector(href);
-
-    // 👉 Se não encontrar, deixa o navegador agir normalmente
-    if (!target) return;
-
-    e.preventDefault();
-
-    const offset =
-      target.getBoundingClientRect().top +
-      window.scrollY -
-      getNavHeight();
-
-    window.scrollTo({
-      top: offset,
-      behavior: 'smooth'
-    });
-  };
-
   const init = () => {
-    document.addEventListener('click', (e) => {
-      const link = e.target.closest('a[href^="#"]');
-      if (!link) return;
-      handleAnchorClick({ currentTarget: link, preventDefault: () => e.preventDefault() });
+    document.querySelectorAll('a[href^="#"]').forEach((link) => {
+      link.addEventListener('click', (e) => {
+        const href = link.getAttribute('href');
+        if (!href || href === '#') return;
+
+        const target = document.querySelector(href);
+        if (!target) return;
+
+        e.preventDefault();
+
+        target.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start'
+        });
+      });
     });
   };
 
