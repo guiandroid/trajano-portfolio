@@ -55,7 +55,7 @@
   --transition-slow:   0.5s ease;
 
   /* Z-index */
-  --z-grain:   1000;
+  --z-grain:   0;
   --z-cursor:  9998;
   --z-nav:     100;
 }
